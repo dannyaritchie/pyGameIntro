@@ -57,6 +57,7 @@ class gPlayer(pygame.sprite.Sprite):
             self.rect.move_ip(translation)
 class aiAPlayer(gPlayer):
     #ai player that runs from other team if they are close and runs towards food if not
+    runningDistance=100
     def __init__(self):
         super(aiAPlayer, self).__init__()
         self.surf=pygame.Surface((50,50))
@@ -80,7 +81,7 @@ class aiAPlayer(gPlayer):
                 if enemy.mass>self.mass:
                     nearestEnemy=enemy
                     nearestEnemyDist=distanceBetweenRects(self.rect,enemy.rect)
-        if nearestEnemyDist<20:
+        if nearestEnemyDist<self.runningDistance:
             translation=moveRectaTowardsRectb(nearestEnemy.rect,self.rect,2)
             self.rect.move_ip(translation)
         else:
@@ -192,6 +193,10 @@ pygame.time.set_timer(ADDFOOD,1000)
 player=Player()
 aiAPlayer=aiAPlayer()
 aiBPlayer=aiBPlayer()
+ateam=pygame.sprite.Group()
+bteam=pygame.sprite.Group()
+ateam.add(aiAPlayer)
+bteam.add(aiBPlayer)
 # Create groups to hold enemy sprites and all sprites
 # - enemies is used for collision detection and position updates
 # - all_sprites is used for rendering
@@ -246,7 +251,16 @@ while running:
     aiAPlayer.eatFood(10*len(aiAcollidedSprites))
     aiBcollidedSprites = pygame.sprite.spritecollide(aiBPlayer,foods,True)
     aiBPlayer.eatFood(10*len(aiBcollidedSprites))
-    print(player.mass)
+    #check if any of either ai have collided and if so kill those with smaller mass
+    dictOfBTeamCollisionForEveryATeam = pygame.sprite.groupcollide(ateam,bteam,False,False)
+    for i in dictOfBTeamCollisionForEveryATeam:
+        for j in dictOfBTeamCollisionForEveryATeam[i]:
+            if i.mass>j.mass:
+               # i.eatFood(j.mass)
+                j.kill()
+            else:
+               # j.eatFood(i.mass)
+                i.kill()
 
     #player.mutualAnnihilation(foods)
     #get keys pressed
