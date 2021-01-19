@@ -175,8 +175,8 @@ pygame.init()
 
 
 # Define constants for the screen width and height
-SCREEN_WIDTH = 2000
-SCREEN_HEIGHT = 1000
+SCREEN_WIDTH = 1500
+SCREEN_HEIGHT = 800
 
 # Set up the drawing window
 screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
