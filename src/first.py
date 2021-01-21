@@ -199,9 +199,6 @@ class Food(pygame.sprite.Sprite):
 
 pygame.init()
 
-
-# Define constants for the screen width and height
-
 # Set up the drawing window
 screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
 
