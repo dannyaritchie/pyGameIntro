@@ -6,12 +6,7 @@ SCREENWIDTH = 500
 
 
 class Tank(pygame.sprite.Sprite):
-    def __init__(self):
-        super(Tank, self).__init__()
-        self.surf = pygame.Surface((50, 50))
-        pygame.draw.rect(self.surf, pygame.Color(255, 0, 0), (0, 0, 50, 50))
-        self.rect = self.surf.get_rect(center = (SCREENWIDTH / 2, SCREENHEIGHT /2))
-    """def __init__(self, speedInput, fireRateInput, damageInput, healthInput, colourInput):
+    def __init__(self, speedInput = 0, fireRateInput = 0, damageInput = 0, healthInput = 0, colourInput = 0):
         super(Tank, self).__init__()
         self.surf = pygame.Surface((50, 50))
         pygame.draw.rect(self.surf, pygame.Color(255, 0, 0), (0, 0, 50, 50))
@@ -20,12 +15,7 @@ class Tank(pygame.sprite.Sprite):
         self.health = healthInput
         self.fireRate = fireRateInput
         self.damage = damageInput
-        self.colour = colourInput"""
-    speed = 0
-    fireRate = 0
-    damage = 0
-    health = 0
-    colour = 0
+        self.colour = colourInput
 
 
 pygame.init()
