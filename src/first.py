@@ -128,24 +128,24 @@ class Player(gPlayer):
         self.rect = self.surf.get_rect()
         self.shotAvailable=True
 
-    def update(self, pressed_keys,bullets):
+    def update(self, pressed_keys, bullets, mousePressed):
         super().update()
-        if pressed_keys[K_UP]:
+        if pressed_keys[pygame.K_w]:
            # self.rect.inflate_ip(0.01,0.01)
             self.rect.move_ip(0, -5)
-        if pressed_keys[K_DOWN]:
+        if pressed_keys[pygame.K_s]:
             self.rect.move_ip(0, 5)
-        if pressed_keys[K_LEFT]:
+        if pressed_keys[pygame.K_a]:
             self.rect.move_ip(-5, 0)
-        if pressed_keys[K_RIGHT]:
+        if pressed_keys[pygame.K_d]:
             self.rect.move_ip(5, 0)
         #bullet logic
         if self.shotAvailable==False:
             if pygame.time.get_ticks()-self.startReloadTime>500:
                 self.shotAvailable=True
-        if pressed_keys[K_SPACE]:
+        if mousePressed[0]:
             if self.shotAvailable==True:
-                bullet=Bullet([self.rect.x,self.rect.y],pygame.mouse.get_pos(),image="../gallery/bullet.png")
+                bullet=Bullet([self.rect.x,self.rect.y],pygame.mouse.get_pos(),image="../gallery/carrot.jpg")
                 bullets.add(bullet)
                 self.shotAvailable=False
                 self.startReloadTime=pygame.time.get_ticks()
@@ -286,8 +286,10 @@ while running:
     #player.mutualAnnihilation(foods)
     #get keys pressed
     pressed_keys = pygame.key.get_pressed()
+    mousePress = pygame.mouse.get_pressed()
+    print(mousePress)
     #update player
-    player.update(pressed_keys,bullets)
+    player.update(pressed_keys,bullets, mousePress)
     for i in bullets:
         i.update(all_sprites)
     # Update enemy position
