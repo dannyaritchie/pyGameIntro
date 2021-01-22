@@ -4,6 +4,8 @@ import pygame
 import random
 import math
 from objects.mapObject import MapObject
+from bullet import Bullet
+from globalvariables import *
 from pygame.locals import (
     RLEACCEL,
     K_UP,
@@ -11,9 +13,11 @@ from pygame.locals import (
     K_LEFT,
     K_RIGHT,
     K_ESCAPE,
+    K_SPACE,
     KEYDOWN,
     QUIT,
 )
+
 def consumeCollision(collider,collidees):
     collidedSprites = pygame.sprite.spritecollide(collider,collidees,True)
 def distanceBetweenRects(recta,rectb):
@@ -48,13 +52,16 @@ class gPlayer(pygame.sprite.Sprite):
     def goToNearestFood(self,foods):
         minDist=999999
         for food in foods:
-            print(distanceBetweenRects(self.rect,food.rect))
+            #print(distanceBetweenRects(self.rect,food.rect))
             if distanceBetweenRects(self.rect,food.rect) < minDist:
                 nearestFood = food
                 minDist=distanceBetweenRects(self.rect,food.rect)
         if minDist < 999999:
             translation=moveRectaTowardsRectb(self.rect,nearestFood.rect,2)
             self.rect.move_ip(translation)
+    def hitByBullet(self,damage,special):
+        self.kill()
+     
 class aiAPlayer(gPlayer):
     #ai player that runs from other team if they are close and runs towards food if not
     runningDistance=100
@@ -73,7 +80,7 @@ class aiAPlayer(gPlayer):
         super().update()
         minDist=999999
         nearestFood=0
-        print(len(foods))
+        #print(len(foods))
         nearestEnemyDist=999999
         nearestEnemy=0
         for enemy in enemies:
@@ -119,8 +126,9 @@ class Player(gPlayer):
         tempSurface.set_colorkey((255, 255, 255), RLEACCEL)
         self.surf=pygame.transform.scale(tempSurface,(self.mass,self.mass))
         self.rect = self.surf.get_rect()
+        self.shotAvailable=True
 
-    def update(self, pressed_keys):
+    def update(self, pressed_keys,bullets):
         super().update()
         if pressed_keys[K_UP]:
            # self.rect.inflate_ip(0.01,0.01)
@@ -131,6 +139,19 @@ class Player(gPlayer):
             self.rect.move_ip(-5, 0)
         if pressed_keys[K_RIGHT]:
             self.rect.move_ip(5, 0)
+        #bullet logic
+        if self.shotAvailable==False:
+            if pygame.time.get_ticks()-self.startReloadTime>500:
+                self.shotAvailable=True
+        if pressed_keys[K_SPACE]:
+            if self.shotAvailable==True:
+                bullet=Bullet([self.rect.x,self.rect.y],pygame.mouse.get_pos(),image="../gallery/bullet.png")
+                bullets.add(bullet)
+                self.shotAvailable=False
+                self.startReloadTime=pygame.time.get_ticks()
+
+
+            
         
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
@@ -152,6 +173,8 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.move_ip(-self.speed, 0)
         if self.rect.right < 0:
             self.kill()
+    def hitByBullet(self,damage,special):
+        self.kill()
 
 class Food(pygame.sprite.Sprite):
     def __init__(self):
@@ -170,14 +193,11 @@ class Food(pygame.sprite.Sprite):
                 random.randint(0, SCREEN_HEIGHT),
             )
         )'''
+    def hitByBullet(self,damage,special):
+        self.kill()
 
 
 pygame.init()
-
-
-# Define constants for the screen width and height
-SCREEN_WIDTH = 1500
-SCREEN_HEIGHT = 800
 
 # Set up the drawing window
 screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
@@ -204,6 +224,7 @@ enemies = pygame.sprite.Group()
 foods = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player,aiAPlayer,aiBPlayer)
+bullets = pygame.sprite.Group()
 
 
 # Run until the user asks to quit
@@ -242,7 +263,7 @@ while running:
         player.kill()
         running = False
    # if pygame.sprite.spritecollideany(player, foods):
-   #     print("H")
+   #     #print("H")
    #     player.kill()
    #     running = False
     collidedSprites = pygame.sprite.spritecollide(player,foods,True)
@@ -266,13 +287,18 @@ while running:
     #get keys pressed
     pressed_keys = pygame.key.get_pressed()
     #update player
-    player.update(pressed_keys)
+    player.update(pressed_keys,bullets)
+    for i in bullets:
+        i.update(all_sprites)
     # Update enemy position
     enemies.update()
     aiAPlayer.update([aiBPlayer],foods)
     aiBPlayer.update([aiAPlayer],foods)
     #draw player
     screen.blit(player.surf, player.rect)
+    
+    for i in bullets:
+        screen.blit(i.surf,i.rect)
     #update screen
     pygame.display.flip()
 
