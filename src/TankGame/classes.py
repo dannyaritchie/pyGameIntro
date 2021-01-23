@@ -21,6 +21,17 @@ class Tank(pygame.sprite.Sprite):
         self.baseCenter = (self.x - width / 2, self.y - height / 2)
         self.turretCenter = (self.x - width / 2, self.y - height / 2)
 
+    def update(self, bullet, pressedKeys):
+        if not self.shotAvailable:
+            if pygame.time.get_ticks()-self.startReloadTime > self.fireRate:
+                self.shotAvailable = True
+        if pressedKeys[K_SPACE]:
+            if self.shotAvailable:
+                bullet=Bullet([self.rect.x, self.rect.y], pygame.mouse.get_pos(), image="../gallery/bullet.png", speed=0.1)
+                bullets.add(bullet)
+                self.shotAvailable = False
+                self.startReloadTime = pygame.time.get_ticks()
+
     def move(self, directions):
         if directions[0] == 0 | directions[1] == 0:
             coeff = 1
