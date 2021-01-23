@@ -1,5 +1,6 @@
 import pygame
 
+
 def movement(pressed_keys):
     move = [0, 0]
     if pressed_keys[pygame.K_w]:
