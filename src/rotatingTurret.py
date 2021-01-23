@@ -53,5 +53,4 @@ while running:
     gameScreen.fill((255,255,255))
     cursorX, cursorY = pygame.mouse.get_pos()
     space_ship.display(gameScreen, cursorX, cursorY, offset)
-
     pygame.display.update()
