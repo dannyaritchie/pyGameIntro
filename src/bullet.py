@@ -14,8 +14,9 @@ class Bullet(pygame.sprite.Sprite):
     #speed: number: number of pixels bullet moves per update
     #image: string: relative file address of image to be used for bullet
     #special: ["",""]: list of string that bullet passes to object it collides with for special effects
-    #size: [width,length]: dimensions of bullet 
-    def __init__(self, startPosition, destinationPosition, damage=0,speed=0.5,image="",special=[],size=[60,60]):
+    #size: [width,length]: dimensions of bullet
+    #unhittable: sprite: sprite that cant be hit by bullet
+    def __init__(self, startPosition, destinationPosition, damage=0,speed=0.5,image="",special=[],size=[60,60], unhittable=None):
         #call parent class (pygame.sprite.Sprite) constructor
         super(Bullet, self).__init__()
         #simple assignment of initialisation arguments to instance variable (class variables that are instance specific)
@@ -24,6 +25,7 @@ class Bullet(pygame.sprite.Sprite):
         self.image=image
         self.special=special
         self.size=size
+        self.unhittable=unhittable
 
         #these are to keep track of future bullet position, cant use usual .rect provided py pygame as it rounds to nearest pixel which causes bullets to miss at long distance
         self.floatx=float(startPosition[0])
@@ -63,20 +65,30 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.surf.get_rect(center=(self.floatx,self.floaty))
 
         #destroy bullet once its gone off screen 
-        if self.rect.left < -self.size[0] - 1:
+        if self.rect.left < -self.size[0] - 20:
             self.kill()
-        if self.rect.right > SCREEN_WIDTH+self.size[0]+1:
+        if self.rect.right > SCREEN_WIDTH+self.size[0]+20:
             self.kill()
-        if self.rect.top <= 0-self.size[1]-1:
+        if self.rect.top <= 0-self.size[1]-20:
             self.kill()
-        if self.rect.bottom >= SCREEN_HEIGHT+self.size[1]+1:
+        if self.rect.bottom >= SCREEN_HEIGHT+self.size[1]+20:
             self.kill()
-        
+        f=False
+        if len(otherObjects)>0:
+            f=True
+        if f:
+            print(len(otherObjects))
+        #create coppy list so original list isnt chaged
+        hittableObjects=otherObjects.copy()
+        #remove unhittable objects from list of objects
+        hittableObjects.remove(self.unhittable)
+        if f:
+            print(len(hittableObjects))
         #get list of objects bullet has collided with
-        collidedObjects = pygame.sprite.spritecollide(self,otherObjects,False)
+        collidedObjects = pygame.sprite.spritecollide(self, hittableObjects, False)
         #call collision function for any objects bullet collided with and pass on damage and special instance variables
         for i in collidedObjects:
-            i.hitByBullet(self.damage,self.special)
+            i.hitByBullet(self.damage, self.special)
         #if bullet collided with at least one object destroy bullet
         if len(collidedObjects)>0:
             self.kill()
